@@ -37,11 +37,12 @@ import {
   Sun,
   Moon,
   ChevronRight,
-  Sparkles,
   X,
   Save,
   Globe,
   FileText,
+  ArrowLeft,
+  LucideDice3,
 } from "lucide-react";
 import PasswordGenerator from "./Passwordgenerator";
 
@@ -53,7 +54,6 @@ interface VaultProps {
 
 type ViewMode = "view" | "create" | "edit";
 
-// Helper function to get favicon URL from a website URL
 const getFaviconUrl = (url: string | undefined): string | null => {
   if (!url) return null;
   try {
@@ -62,6 +62,32 @@ const getFaviconUrl = (url: string | undefined): string | null => {
   } catch {
     return null;
   }
+};
+
+const colorFromName = (name: string) => {
+  const colors = [
+    "#0ea5e9",
+    "#7c3aed",
+    "#ef4444",
+    "#f59e0b",
+    "#10b981",
+    "#06b6d4",
+    "#ef6aa7",
+    "#64748b",
+  ];
+  const sum = name.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
+  return colors[sum % colors.length];
+};
+
+const getLetterAvatarUrl = (name: string, size = 128) => {
+  const letter = (name && name.charAt(0).toUpperCase()) || "?";
+  const bg = colorFromName(name || "");
+  const fg = "#ffffff";
+  const fontSize = Math.floor(size * 0.5);
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect width='100%' height='100%' fill='${bg}' rx='${Math.floor(
+    size * 0.12,
+  )}'/><text x='50%' y='50%' dy='0.35em' text-anchor='middle' font-family='system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' font-size='${fontSize}' font-weight='bold' fill='${fg}'>${letter}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 };
 
 export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
@@ -79,6 +105,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
   const [faviconErrors, setFaviconErrors] = useState<Record<string, boolean>>(
     {},
   );
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
   const navigate = useNavigate();
 
   const [entryForm, setEntryForm] = useState({
@@ -138,6 +165,23 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
     }
   };
 
+  const handleLock = () => {
+    setVault(null);
+    setMasterPassword("");
+    setUnlocked(false);
+    setSelectedEntry(null);
+    setViewMode("view");
+    setShowPassword({});
+    setShowMobileDetail(false);
+    setEntryForm({
+      name: "",
+      username: "",
+      password: "",
+      url: "",
+      notes: "",
+    });
+  };
+
   const saveVault = async (updatedVault: Vault) => {
     try {
       setSaving(true);
@@ -163,6 +207,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
     setEntryForm({ name: "", username: "", password: "", url: "", notes: "" });
     setSelectedEntry(null);
     setViewMode("create");
+    setShowMobileDetail(true);
   };
 
   const handleEditEntry = (entry: VaultEntry) => {
@@ -175,6 +220,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
     });
     setSelectedEntry(entry);
     setViewMode("edit");
+    setShowMobileDetail(true);
   };
 
   const handleSaveEntry = async () => {
@@ -200,12 +246,19 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
   };
 
   const handleCancelEdit = () => {
-    if (selectedEntry) {
+    if (selectedEntry && viewMode === "edit") {
       setViewMode("view");
     } else {
       setViewMode("view");
       setSelectedEntry(null);
+      setShowMobileDetail(false);
     }
+  };
+
+  const handleBackToList = () => {
+    setShowMobileDetail(false);
+    setSelectedEntry(null);
+    setViewMode("view");
   };
 
   const handleDeleteEntry = async (id: string) => {
@@ -214,6 +267,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
     await saveVault({ entries: updatedEntries });
     setSelectedEntry(null);
     setViewMode("view");
+    setShowMobileDetail(false);
   };
 
   const handleCopy = (text: string) => {
@@ -235,6 +289,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
   const handleSelectEntry = (entry: VaultEntry) => {
     setSelectedEntry(entry);
     setViewMode("view");
+    setShowMobileDetail(true);
   };
 
   const filteredEntries =
@@ -263,7 +318,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-2">
               <div className="p-3 bg-primary/10 rounded-2xl">
-                <Unlock className="w-8 h-8 text-primary" />
+                <Lock className="w-8 h-8 text-primary" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center text-foreground">
@@ -311,9 +366,8 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      {/* Top Navigation */}
-      <header className="flex-none w-full bg-background border-b px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      <header className="flex-none w-full bg-background border-b px-4 md:px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3 md:gap-6 flex-1 min-w-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded flex items-center justify-center overflow-hidden">
               <img
@@ -326,23 +380,33 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
               zCloudPass
             </h1>
           </div>
-          <div className="relative group w-64">
+          <div className="relative group flex-1 max-w-xs md:max-w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 w-full bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-foreground/20"
+              className="pl-9 h-9 max-w-64 bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-foreground/20"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLock}
+            className="rounded-lg h-9 w-9 hover:text-primary"
+            title="Lock Vault"
+          >
+            <Unlock className="w-5 h-5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="rounded-lg h-9 w-9"
+            className="rounded-lg h-9 w-9 hidden md:flex"
+            title="Toggle Theme"
           >
             {theme === "dark" ? (
               <Sun className="w-5 h-5" />
@@ -355,6 +419,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
             size="icon"
             onClick={() => navigate("/settings")}
             className="rounded-lg h-9 w-9"
+            title="Settings"
           >
             <Settings className="w-5 h-5" />
           </Button>
@@ -363,17 +428,22 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
             size="icon"
             onClick={onLogout}
             className="rounded-lg h-9 w-9 hover:text-destructive"
+            title="Logout"
           >
             <LogOut className="w-5 h-5" />
           </Button>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar List */}
-        <aside className="w-full md:w-80 border-r flex flex-col bg-muted/20">
+      <div className="flex-1 flex overflow-hidden relative">
+        <aside
+          className={`w-full md:w-80 border-r flex flex-col bg-muted/20 transition-transform duration-200 md:translate-x-0 ${
+            showMobileDetail
+              ? "-translate-x-full md:translate-x-0 absolute md:relative inset-0 md:inset-auto"
+              : "translate-x-0"
+          }`}
+        >
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {/* New Entry Button styled as list item */}
             <div className="space-y-px px-2 pt-4">
               <button
                 onClick={handleAddEntry}
@@ -392,7 +462,6 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
               </button>
             </div>
 
-            {/* Entry List */}
             {filteredEntries.length > 0 ? (
               <div className="space-y-px px-2 pt-2">
                 {filteredEntries.map((entry) => {
@@ -407,15 +476,13 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                       onClick={() => handleSelectEntry(entry)}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors group ${
                         isActive
-                          ? "bg-foreground text-background"
+                          ? "md:bg-foreground md:text-background"
                           : "hover:bg-muted"
                       }`}
                     >
                       <div
                         className={`w-8 h-8 rounded flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden ${
-                          isActive
-                            ? "bg-background text-foreground"
-                            : "bg-primary/10 text-primary"
+                          isActive ? "text-foreground" : "text-primary"
                         }`}
                       >
                         {showFavicon ? (
@@ -426,7 +493,11 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                             onError={() => handleFaviconError(entry.id)}
                           />
                         ) : (
-                          entry.name.charAt(0).toUpperCase()
+                          <img
+                            src={getLetterAvatarUrl(entry.name)}
+                            alt={entry.name}
+                            className="w-full h-full object-cover"
+                          />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -462,10 +533,28 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
           </div>
         </aside>
 
-        {/* Detail Panel */}
-        <main className="flex-1 bg-background overflow-y-auto custom-scrollbar p-6 md:p-12">
+        <main
+          className={`flex-1 bg-background overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-12 transition-transform duration-200 ${
+            showMobileDetail
+              ? "translate-x-0"
+              : "translate-x-full md:translate-x-0 absolute md:relative inset-0 md:inset-auto"
+          }`}
+        >
+          {(viewMode !== "view" || selectedEntry) && (
+            <div className="md:hidden mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToList}
+                className="gap-2 -ml-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to list
+              </Button>
+            </div>
+          )}
+
           {viewMode === "view" && selectedEntry ? (
-            // View Mode
             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between border-b pb-6">
                 <div className="flex items-center gap-4">
@@ -479,11 +568,15 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                         onError={() => handleFaviconError(selectedEntry.id)}
                       />
                     ) : (
-                      selectedEntry.name.charAt(0).toUpperCase()
+                      <img
+                        src={getLetterAvatarUrl(selectedEntry.name, 128)}
+                        alt={selectedEntry.name}
+                        className="w-full h-full object-cover"
+                      />
                     )}
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight truncate">
                       {selectedEntry.name}
                     </h2>
                     {selectedEntry.url && (
@@ -491,15 +584,15 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                         href={selectedEntry.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mt-1 transition-colors"
+                        className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mt-1 transition-colors truncate"
                       >
-                        <ExternalLink className="w-3 h-3" />
-                        {selectedEntry.url}
+                        <ExternalLink className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{selectedEntry.url}</span>
                       </a>
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="icon"
@@ -525,14 +618,14 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <User className="w-3 h-3" /> Username / Email
                     </Label>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium truncate">
                         {selectedEntry.username}
                       </span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
                         onClick={() => handleCopy(selectedEntry.username!)}
                       >
                         <Copy className="w-4 h-4" />
@@ -546,13 +639,13 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Lock className="w-3 h-3" /> Password
                     </Label>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-lg tracking-wider">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-base md:text-lg tracking-wider truncate">
                         {showPassword[selectedEntry.id]
                           ? selectedEntry.password
                           : "••••••••••••"}
                       </span>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 shrink-0">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -589,7 +682,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                       Notes
                     </Label>
-                    <p className="text-sm whitespace-pre-wrap">
+                    <p className="text-sm whitespace-pre-wrap break-words">
                       {selectedEntry.notes}
                     </p>
                   </div>
@@ -597,19 +690,18 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
               </div>
             </div>
           ) : viewMode === "create" || viewMode === "edit" ? (
-            // Create/Edit Mode
             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between border-b pb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                     {viewMode === "create" ? (
                       <Plus className="w-8 h-8 text-primary" />
                     ) : (
                       <Settings className="w-8 h-8 text-primary" />
                     )}
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight">
+                  <div className="min-w-0">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
                       {viewMode === "create" ? "New Entry" : "Edit Entry"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -623,7 +715,7 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                   variant="ghost"
                   size="icon"
                   onClick={handleCancelEdit}
-                  className="h-10 w-10"
+                  className="h-10 w-10 shrink-0"
                 >
                   <X className="w-4 h-4" />
                 </Button>
@@ -711,10 +803,10 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                       variant="outline"
                       type="button"
                       onClick={handleGeneratePassword}
-                      className="h-11 px-4 gap-2"
+                      className="h-11 px-3 md:px-4 gap-2 shrink-0"
                     >
-                      <Sparkles className="w-4 h-4" />
-                      Generate
+                      <LucideDice3 className="w-4 h-4" />
+                      <span className="hidden sm:inline">Generate</span>
                     </Button>
                   </div>
                 </div>
@@ -754,12 +846,13 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
                     {saving ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        Encrypting...
+                        <span className="hidden sm:inline">Encrypting...</span>
                       </>
                     ) : (
                       <>
                         <Save className="w-4 h-4" />
-                        Save Entry
+                        <span className="hidden sm:inline">Save Entry</span>
+                        <span className="sm:hidden">Save</span>
                       </>
                     )}
                   </Button>
@@ -767,13 +860,12 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
               </div>
             </div>
           ) : (
-            // Empty State
             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground space-y-4">
-              <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="w-40 h-40 bg-muted/30 rounded-full flex items-center justify-center overflow-hidden">
                 <img
                   src="/favicon.svg"
                   alt="zCloudPass"
-                  className="w-10 h-10 opacity-20 object-contain"
+                  className="w-32 h-32 opacity-20 object-contain"
                 />
               </div>
               <div className="space-y-1">
@@ -790,7 +882,6 @@ export default function Vault({ onLogout, theme, toggleTheme }: VaultProps) {
         </main>
       </div>
 
-      {/* Password Generator Dialog */}
       <PasswordGenerator
         open={generatorOpen}
         onOpenChange={setGeneratorOpen}

@@ -1,4 +1,14 @@
 {
+  "build": { "beforeDevCommand": "npm run dev", "beforeBuildCommand": "npm run build", "devPath": "http://localhost:1420", "distDir": "../dist" },
+  "package": { "productName": "zCloudPass", "version": "0.1.0", "identifier": "com.zcloudpass.app" },
+  "tauri": {
+    "allowlist": { "all": false, "shell": { "all": false, "open": true }, "http": { "all": true, "request": true, "scope": ["http://localhost:8080/**", "https://**"] } },
+    "bundle": { "active": true, "targets": "all", "identifier": "com.zcloudpass.app", "icon": ["icons/32x32.png","icons/128x128.png","icons/128x128@2x.png","icons/icon.icns","icons/icon.ico"] },
+    "security": { "csp": null },
+    "windows": [ { "fullscreen": false, "resizable": true, "title": "zCloudPass", "width": 1200, "height": 800, "minWidth": 800, "minHeight": 600 } ]
+  }
+}
+{
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
@@ -7,7 +17,8 @@
   },
   "package": {
     "productName": "zCloudPass",
-    "version": "0.1.0"
+    "version": "0.1.0",
+    "identifier": "com.zcloudpass.app"
   },
   "tauri": {
     "allowlist": {
@@ -53,3 +64,68 @@
     ]
   }
 }
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "productName": "zCloudPass",
+  "version": "0.1.0",
+  "identifier": "com.zcloudpass.app",
+  "allowlist": {
+    {
+      "build": {
+        "beforeDevCommand": "npm run dev",
+        "beforeBuildCommand": "npm run build",
+        "devPath": "http://localhost:1420",
+        "distDir": "../dist"
+      },
+      "package": {
+        "productName": "zCloudPass",
+        "version": "0.1.0",
+        "identifier": "com.zcloudpass.app"
+      },
+      "tauri": {
+        "allowlist": {
+          "all": false,
+          "shell": {
+            "all": false,
+            "open": true
+          },
+          "http": {
+            "all": true,
+            "request": true,
+            "scope": [
+              "http://localhost:8080/**",
+              "https://**"
+            ]
+          }
+        },
+        "bundle": {
+          "active": true,
+          "targets": "all",
+          "identifier": "com.zcloudpass.app",
+          "icon": [
+            "icons/32x32.png",
+            "icons/128x128.png",
+            "icons/128x128@2x.png",
+            "icons/icon.icns",
+            "icons/icon.ico"
+          ]
+        },
+        "security": {
+          "csp": null
+        },
+        "windows": [
+          {
+            "fullscreen": false,
+            "resizable": true,
+            "title": "zCloudPass",
+            "width": 1200,
+            "height": 800,
+            "minWidth": 800,
+            "minHeight": 600
+          }
+        ]
+      }
+    }

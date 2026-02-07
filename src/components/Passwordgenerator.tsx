@@ -146,7 +146,6 @@ export default function PasswordGenerator({
   const [password, setPassword] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Password mode settings
   const [length, setLength] = useState(16);
   const [includeUppercase, setIncludeUppercase] = useState(true);
   const [includeLowercase, setIncludeLowercase] = useState(true);
@@ -154,7 +153,6 @@ export default function PasswordGenerator({
   const [includeSymbols, setIncludeSymbols] = useState(true);
   const [excludeAmbiguous, setExcludeAmbiguous] = useState(false);
 
-  // Passphrase mode settings
   const [wordCount, setWordCount] = useState(4);
   const [separator, setSeparator] = useState("-");
   const [capitalize, setCapitalize] =
@@ -182,7 +180,7 @@ export default function PasswordGenerator({
     }
 
     if (charset.length === 0) {
-      charset = lowercase; // Fallback
+      charset = lowercase;
     }
 
     let result = "";
@@ -193,7 +191,6 @@ export default function PasswordGenerator({
       result += charset[array[i] % charset.length];
     }
 
-    // Ensure at least one character from each selected type
     const ensureChars = [];
     if (includeUppercase) ensureChars.push(uppercase);
     if (includeLowercase) ensureChars.push(lowercase);
@@ -216,7 +213,6 @@ export default function PasswordGenerator({
     const selectedWords: string[] = [];
     const usedIndices = new Set<number>();
 
-    // Select random unique words
     while (selectedWords.length < wordCount) {
       const index = Math.floor(Math.random() * WORD_LIST.length);
       if (!usedIndices.has(index)) {
@@ -225,7 +221,6 @@ export default function PasswordGenerator({
       }
     }
 
-    // Apply capitalization
     const capitalizedWords = selectedWords.map((word, idx) => {
       switch (capitalize) {
         case "all":
@@ -245,7 +240,6 @@ export default function PasswordGenerator({
 
     let result = capitalizedWords.join(separator);
 
-    // Add number at the end
     if (includeNumber) {
       const randomNum = Math.floor(Math.random() * 9999);
       result += separator + randomNum;
@@ -276,7 +270,6 @@ export default function PasswordGenerator({
     }
   };
 
-  // Generate initial password when dialog opens
   const handleOpenChange = (open: boolean) => {
     if (open && !password) {
       handleGenerate();
@@ -297,7 +290,6 @@ export default function PasswordGenerator({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Mode Toggle */}
           <div className="flex gap-2">
             <Button
               variant={mode === "password" ? "default" : "outline"}
@@ -315,7 +307,6 @@ export default function PasswordGenerator({
             </Button>
           </div>
 
-          {/* Generated Password Display */}
           <div className="space-y-2">
             <Label>
               Generated {mode === "password" ? "Password" : "Passphrase"}
@@ -344,7 +335,6 @@ export default function PasswordGenerator({
             </div>
           </div>
 
-          {/* Password Mode Settings */}
           {mode === "password" && (
             <div className="space-y-5">
               <div className="space-y-3">
@@ -410,7 +400,6 @@ export default function PasswordGenerator({
             </div>
           )}
 
-          {/* Passphrase Mode Settings */}
           {mode === "passphrase" && (
             <div className="space-y-5">
               <div className="space-y-3">

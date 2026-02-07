@@ -12,7 +12,14 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
-import { ArrowLeft, Lock, AlertCircle, CheckCircle2, Sun, Moon } from "lucide-react";
+import {
+  ArrowLeft,
+  Lock,
+  AlertCircle,
+  CheckCircle2,
+  Sun,
+  Moon,
+} from "lucide-react";
 
 interface SettingsProps {
   onLogout: () => void;
@@ -20,7 +27,11 @@ interface SettingsProps {
   toggleTheme: () => void;
 }
 
-export default function Settings({ onLogout, theme, toggleTheme }: SettingsProps) {
+export default function Settings({
+  onLogout,
+  theme,
+  toggleTheme,
+}: SettingsProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -57,7 +68,6 @@ export default function Settings({ onLogout, theme, toggleTheme }: SettingsProps
       setNewPassword("");
       setConfirmPassword("");
 
-      // Logout after 2 seconds
       setTimeout(() => {
         onLogout();
       }, 2000);
@@ -74,7 +84,6 @@ export default function Settings({ onLogout, theme, toggleTheme }: SettingsProps
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Header */}
         <div className="flex items-center gap-6">
           <Button
             variant="ghost"
@@ -94,7 +103,6 @@ export default function Settings({ onLogout, theme, toggleTheme }: SettingsProps
           </div>
         </div>
 
-        {/* Change Password Card */}
         <Card className="border shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3 mb-1">
@@ -171,18 +179,23 @@ export default function Settings({ onLogout, theme, toggleTheme }: SettingsProps
               <div className="p-4 rounded-xl bg-muted border flex gap-3">
                 <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0" />
                 <p className="text-xs leading-relaxed text-foreground font-medium">
-                  <strong>Warning:</strong> Your new master password will be used to re-encrypt everything. If forgotten, no one can recover your data.
+                  <strong>Warning:</strong> Your new master password will be
+                  used to re-encrypt everything. If forgotten, no one can
+                  recover your data.
                 </p>
               </div>
 
-              <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-semibold"
+                disabled={loading}
+              >
                 {loading ? "Processing..." : "Update Security Keys"}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Account Info */}
         <Card className="border shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Account Session</CardTitle>
@@ -191,12 +204,18 @@ export default function Settings({ onLogout, theme, toggleTheme }: SettingsProps
           <CardContent className="space-y-2 pt-2">
             <div className="flex justify-between items-center py-3 border-b">
               <span className="text-sm font-medium">Encryption Status</span>
-              <span className="text-xs font-bold px-2 py-1 bg-primary text-primary-foreground rounded-lg">Active (AES-GCM)</span>
+              <span className="text-xs font-bold px-2 py-1 bg-primary text-primary-foreground rounded-lg">
+                Active (AES-GCM)
+              </span>
             </div>
             <div className="flex justify-between items-center py-3">
               <div className="space-y-0.5">
-                <span className="text-sm font-medium block">Active Session</span>
-                <span className="text-xs text-muted-foreground block">Expires on browser close</span>
+                <span className="text-sm font-medium block">
+                  Active Session
+                </span>
+                <span className="text-xs text-muted-foreground block">
+                  Expires on browser close
+                </span>
               </div>
               <Button
                 variant="outline"

@@ -30,7 +30,8 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
   const getPasswordStrength = (
     pwd: string,
   ): { strength: string; color: string } => {
-    if (pwd.length < 8) return { strength: "Weak", color: "text-muted-foreground" };
+    if (pwd.length < 8)
+      return { strength: "Weak", color: "text-muted-foreground" };
     if (pwd.length < 12)
       return { strength: "Medium", color: "text-foreground" };
     if (
@@ -61,18 +62,15 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
     setLoading(true);
 
     try {
-      // Create empty encrypted vault
       const emptyVault = createEmptyVault();
       const encryptedVault = await encryptVault(emptyVault, password);
 
-      // Register user with encrypted vault
       await api.register({
         email,
         master_password: password,
         encrypted_vault: encryptedVault,
       });
 
-      // Auto-login after registration
       await api.login({
         email,
         master_password: password,
@@ -108,14 +106,19 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <Alert variant="destructive" className="animate-in slide-in-from-top-2">
+              <Alert
+                variant="destructive"
+                className="animate-in slide-in-from-top-2"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium ml-1">Email Address</Label>
+              <Label htmlFor="email" className="text-sm font-medium ml-1">
+                Email Address
+              </Label>
               <div className="relative group">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
@@ -132,7 +135,13 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" title="password" className="text-sm font-medium ml-1">Master Password</Label>
+              <Label
+                htmlFor="password"
+                title="password"
+                className="text-sm font-medium ml-1"
+              >
+                Master Password
+              </Label>
               <div className="relative group">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
@@ -150,20 +159,32 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                 <div className="px-1 pt-1 space-y-1.5">
                   <div className="flex items-center justify-between text-[11px] uppercase tracking-wider font-bold">
                     <span className="text-muted-foreground">Strength</span>
-                    <span className={passwordStrength.color}>{passwordStrength.strength}</span>
+                    <span className={passwordStrength.color}>
+                      {passwordStrength.strength}
+                    </span>
                   </div>
                   <div className="flex gap-1 h-1">
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className={`h-full flex-1 rounded-full transition-all duration-500 ${i === 1 && passwordStrength.strength !== ""
-                          ? (passwordStrength.strength === "Weak" ? "bg-muted-foreground/30" : passwordStrength.strength === "Medium" ? "bg-muted-foreground/60" : "bg-foreground")
-                          : i === 2 && (passwordStrength.strength === "Medium" || passwordStrength.strength === "Strong")
-                            ? (passwordStrength.strength === "Medium" ? "bg-muted-foreground/60" : "bg-foreground")
-                            : i === 3 && passwordStrength.strength === "Strong"
-                              ? "bg-foreground"
-                              : "bg-muted"
-                          }`}
+                        className={`h-full flex-1 rounded-full transition-all duration-500 ${
+                          i === 1 && passwordStrength.strength !== ""
+                            ? passwordStrength.strength === "Weak"
+                              ? "bg-muted-foreground/30"
+                              : passwordStrength.strength === "Medium"
+                                ? "bg-muted-foreground/60"
+                                : "bg-foreground"
+                            : i === 2 &&
+                                (passwordStrength.strength === "Medium" ||
+                                  passwordStrength.strength === "Strong")
+                              ? passwordStrength.strength === "Medium"
+                                ? "bg-muted-foreground/60"
+                                : "bg-foreground"
+                              : i === 3 &&
+                                  passwordStrength.strength === "Strong"
+                                ? "bg-foreground"
+                                : "bg-muted"
+                        }`}
                       />
                     ))}
                   </div>
@@ -172,7 +193,13 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" title="confirmPassword" className="text-sm font-medium ml-1">Confirm Password</Label>
+              <Label
+                htmlFor="confirmPassword"
+                title="confirmPassword"
+                className="text-sm font-medium ml-1"
+              >
+                Confirm Password
+              </Label>
               <div className="relative group">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
@@ -194,11 +221,16 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
             <div className="p-3 rounded-xl bg-muted border flex gap-3">
               <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0" />
               <p className="text-[11px] leading-relaxed text-foreground font-medium">
-                IMPORTANT: Your master password is the ONLY key to your vault. If lost, it cannot be recovered.
+                IMPORTANT: Your master password is the ONLY key to your vault.
+                If lost, it cannot be recovered.
               </p>
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full h-11 text-base font-semibold"
+              disabled={loading}
+            >
               {loading ? "Securing..." : "Create Master Vault"}
             </Button>
           </form>
